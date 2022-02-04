@@ -1,4 +1,11 @@
-import { CommandInteraction, Interaction, MessageEmbed } from 'discord.js';
+import {
+  CommandInteraction,
+  DateResolvable,
+  GuildScheduledEventCreateOptions,
+  GuildScheduledEventManager,
+  Interaction,
+  MessageEmbed
+} from 'discord.js';
 import { Event, parseEvent, parseEvents } from '../services/FightParser';
 import Logger from '../services/Logging/Logger';
 import UfcService from '../services/UfcService';
@@ -15,6 +22,7 @@ export default class InteractionHandler {
     this.buildFightEmbed = this.buildFightEmbed.bind(this);
     this.handleCommand = this.handleCommand.bind(this);
     this.getFightLinks = this.getFightLinks.bind(this);
+    this.handleCreateFightEvent = this.handleCreateFightEvent.bind(this);
     this.handleFight = this.handleFight.bind(this);
     this.handleFights = this.handleFights.bind(this);
     this.handleInteraction = this.handleInteraction.bind(this);
@@ -51,6 +59,9 @@ export default class InteractionHandler {
         break;
       case 'fights':
         this.handleFights(interaction);
+        break;
+      case 'createFightEvent':
+        this.handleCreateFightEvent(interaction);
         break;
       default:
         this.logger.info(`Command not supported - ${command}`);
@@ -91,6 +102,20 @@ export default class InteractionHandler {
     const event: Event = parseEvent(eventHtml);
 
     await interaction.reply({ embeds: [this.buildFightEmbed(event, link)] });
+  }
+
+  private async handleCreateFightEvent(interaction: CommandInteraction): Promise<void> {
+    const startTime = new Date();
+    startTime.setDate(Date.now());
+
+    const eventCreateOptions: GuildScheduledEventCreateOptions = {
+      name: "Event 1",
+      scheduledStartTime: startTime,
+      privacyLevel: "GUILD_ONLY",
+      entityType: "VOICE",
+    };
+
+    interaction.guild.scheduledEvents.create(eventCreateOptions);
   }
 
   public handleInteraction(interaction: Interaction): void {

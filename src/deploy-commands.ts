@@ -13,6 +13,9 @@ const commands = [
   new SlashCommandBuilder()
     .setName('fights')
     .setDescription('Replies with links to upcoming fights'),
+  new SlashCommandBuilder()
+    .setName('createFightEvent')
+    .setDescription('Creates an Event for the Fight'),
 ].map((command) => command.toJSON());
 
 const rest = new REST({ version: '9' }).setToken(env.DISCORD_TOKEN);
