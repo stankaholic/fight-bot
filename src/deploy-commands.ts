@@ -14,7 +14,7 @@ const commands = [
     .setName('fights')
     .setDescription('Replies with links to upcoming fights'),
   new SlashCommandBuilder()
-    .setName('createFightEvent')
+    .setName('fight-event')
     .setDescription('Creates an Event for the Fight'),
 ].map((command) => command.toJSON());
 
@@ -22,8 +22,13 @@ const rest = new REST({ version: '9' }).setToken(env.DISCORD_TOKEN);
 
 (async () => {
   try {
-    const route = Routes.applicationCommands(env.CLIENT_ID);
-    await rest.put(route, {
+    const appCmds = Routes.applicationCommands(env.CLIENT_ID);
+    await rest.put(appCmds, {
+      body: commands,
+    });
+
+    const appGuildCmds = Routes.applicationGuildCommands(env.CLIENT_ID, env.GUILD_ID);
+    await rest.put(appGuildCmds, {
       body: commands,
     });
 

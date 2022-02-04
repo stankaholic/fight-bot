@@ -1,10 +1,15 @@
 import {
+  GuildChannelManager,
+  Collection,
   CommandInteraction,
   DateResolvable,
+  GuildBasedChannel,
   GuildScheduledEventCreateOptions,
   GuildScheduledEventManager,
+  GuildVoiceChannelResolvable,
   Interaction,
-  MessageEmbed
+  MessageEmbed,
+  VoiceChannel
 } from 'discord.js';
 import { Event, parseEvent, parseEvents } from '../services/FightParser';
 import Logger from '../services/Logging/Logger';
@@ -22,7 +27,7 @@ export default class InteractionHandler {
     this.buildFightEmbed = this.buildFightEmbed.bind(this);
     this.handleCommand = this.handleCommand.bind(this);
     this.getFightLinks = this.getFightLinks.bind(this);
-    this.handleCreateFightEvent = this.handleCreateFightEvent.bind(this);
+    this.handleFightEvent = this.handleFightEvent.bind(this);
     this.handleFight = this.handleFight.bind(this);
     this.handleFights = this.handleFights.bind(this);
     this.handleInteraction = this.handleInteraction.bind(this);
@@ -60,8 +65,8 @@ export default class InteractionHandler {
       case 'fights':
         this.handleFights(interaction);
         break;
-      case 'createFightEvent':
-        this.handleCreateFightEvent(interaction);
+      case 'fight-event':
+        this.handleFightEvent(interaction);
         break;
       default:
         this.logger.info(`Command not supported - ${command}`);
@@ -104,15 +109,25 @@ export default class InteractionHandler {
     await interaction.reply({ embeds: [this.buildFightEmbed(event, link)] });
   }
 
-  private async handleCreateFightEvent(interaction: CommandInteraction): Promise<void> {
+  private async handleFightEvent(interaction: CommandInteraction): Promise<void> {
     const startTime = new Date();
-    startTime.setDate(Date.now());
+    startTime.setFullYear(2022, 2, 4);
+    startTime.setHours(8);
+
+    const channels: GuildChannelManager = interaction.guild.channels;
+
+    //var iter = channels.cache.first;
+
+    for (let iter of channels.cache.values()) {
+      this.logger.debug(`channel name: ${iter.name}`) // this returns the Snowflake id?
+    }
 
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
       name: "Event 1",
       scheduledStartTime: startTime,
       privacyLevel: "GUILD_ONLY",
       entityType: "VOICE",
+      channel: "General",
     };
 
     interaction.guild.scheduledEvents.create(eventCreateOptions);
