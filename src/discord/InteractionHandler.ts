@@ -12,7 +12,9 @@ import {
   MessageActionRow,
   MessageActionRowComponent,
   MessageSelectMenu,
+  MessageSelectOption,
   MessageSelectOptionData,
+  SelectMenuInteraction,
   VoiceChannel
 } from 'discord.js';
 import { Event, parseEvent, parseEvents } from '../services/FightParser';
@@ -30,6 +32,7 @@ export default class InteractionHandler {
 
     this.buildFightEmbed = this.buildFightEmbed.bind(this);
     this.handleCommand = this.handleCommand.bind(this);
+    this.handleSelectMenu = this.handleSelectMenu.bind(this);
     this.getFightLinks = this.getFightLinks.bind(this);
     this.handleFightEvent = this.handleFightEvent.bind(this);
     this.handleFight = this.handleFight.bind(this);
@@ -78,6 +81,22 @@ export default class InteractionHandler {
     }
   }
 
+  private async handleSelectMenu(
+    interaction: SelectMenuInteraction,
+    menuId: string
+  ): Promise<void> {
+    this.logger.info(`Processing menu - ${menuId}`);
+
+    switch (menuId) {
+      case 'event-channel':
+        this.handleEventChannel(interaction);
+        break;
+      default:
+        this.logger.info(`Menu not supported - ${menuId}`);
+        break;
+    }
+  }
+
   private async getFightLinks(): Promise<string[]> {
     try {
       const eventHtml = await this.dataService.fetchEvents();
@@ -114,17 +133,14 @@ export default class InteractionHandler {
   }
 
   private async handleFightEvent(interaction: CommandInteraction): Promise<void> {
-    const startTime = new Date();
-    startTime.setFullYear(2022, 2, 4);
-    startTime.setHours(8);
+
 
     const channels: GuildChannelManager = interaction.guild.channels;
 
-    var channelId;
     var msg: MessageActionRow = new MessageActionRow();
     var iteration = 1;
     var menu: MessageSelectMenu = new MessageSelectMenu();
-    menu.setCustomId("Channel Selection");
+    menu.setCustomId("event-channel");
     for (let [id, channel] of channels.cache.entries()) {
       this.logger.debug(`id: ${id.toString()} name: ${channel.name}`);
       menu.addOptions([
@@ -134,37 +150,49 @@ export default class InteractionHandler {
           emoji: `${iteration}:one`,
         },
       ]);
-
-      if (channel.name == "General") {
-        channelId = id;
-      }
     }
 
     msg.addComponents(menu)
-
-    const eventCreateOptions: GuildScheduledEventCreateOptions = {
-      name: "Event 1",
-      scheduledStartTime: startTime,
-      privacyLevel: "GUILD_ONLY",
-      entityType: "VOICE",
-      channel: channelId,
-    };
-
-    //interaction.guild.scheduledEvents.create(eventCreateOptions);
 
     await interaction.reply({
       content: "Please select the channel for the event",
       components: [msg]
     });
   }
+  private async handleEventChannel(interaction: SelectMenuInteraction): Promise<void> {
+    const startTime = new Date();
+    startTime.setFullYear(2022, 2, 4);
+    startTime.setHours(8);
+
+    this.logger.debug(`interaction.message: ${interaction.message}`)
+    this.logger.debug(`interaction.locale: ${interaction.locale}`)
+    for (let value of interaction.values)
+    {
+      this.logger.debug(`value: ${value}`)
+    }
+    this.logger.debug(`pop value: ${interaction.values.pop()}`)  
+
+    //const eventCreateOptions: GuildScheduledEventCreateOptions = {
+    //  name: "Event 1",
+    //  scheduledStartTime: startTime,
+    //  privacyLevel: "GUILD_ONLY",
+    //  entityType: "VOICE",
+    //  channel: channelId,
+    //};
+
+    //interaction.guild.scheduledEvents.create(eventCreateOptions);
+  }
 
   public handleInteraction(interaction: Interaction): void {
-    if (!interaction.isCommand()) {
+    if (interaction.isCommand()) {
+      const { commandName } = interaction;
+
+      this.handleCommand(interaction, commandName);
+    } else if (interaction.isSelectMenu()) {
+
+      this.handleSelectMenu(interaction, interaction.customId);
+    } else {
       return;
     }
-
-    const { commandName } = interaction;
-
-    this.handleCommand(interaction, commandName);
   }
 }
