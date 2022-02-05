@@ -9,6 +9,10 @@ import {
   GuildVoiceChannelResolvable,
   Interaction,
   MessageEmbed,
+  MessageActionRow,
+  MessageActionRowComponent,
+  MessageSelectMenu,
+  MessageSelectOptionData,
   VoiceChannel
 } from 'discord.js';
 import { Event, parseEvent, parseEvents } from '../services/FightParser';
@@ -117,13 +121,26 @@ export default class InteractionHandler {
     const channels: GuildChannelManager = interaction.guild.channels;
 
     var channelId;
-
+    var msg: MessageActionRow = new MessageActionRow();
+    var iteration = 1;
+    var menu: MessageSelectMenu = new MessageSelectMenu();
+    menu.setCustomId("Channel Selection");
     for (let [id, channel] of channels.cache.entries()) {
-      this.logger.debug(`id: ${id.toString()} name: ${channel.name}`)
+      this.logger.debug(`id: ${id.toString()} name: ${channel.name}`);
+      menu.addOptions([
+        {
+          label: channel.name,
+          value: id.toString(),
+          emoji: `${iteration}:one`,
+        },
+      ]);
+
       if (channel.name == "General") {
         channelId = id;
       }
     }
+
+    msg.addComponents(menu)
 
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
       name: "Event 1",
@@ -133,7 +150,12 @@ export default class InteractionHandler {
       channel: channelId,
     };
 
-    interaction.guild.scheduledEvents.create(eventCreateOptions);
+    //interaction.guild.scheduledEvents.create(eventCreateOptions);
+
+    await interaction.reply({
+      content: "Please select the channel for the event",
+      components: [msg]
+    });
   }
 
   public handleInteraction(interaction: Interaction): void {
