@@ -34,6 +34,7 @@ export default class InteractionHandler {
     this.handleCommand = this.handleCommand.bind(this);
     this.handleSelectMenu = this.handleSelectMenu.bind(this);
     this.getFightLinks = this.getFightLinks.bind(this);
+    this.getEvent = this.getEvent.bind(this);
     this.handleFightEvent = this.handleFightEvent.bind(this);
     this.handleFight = this.handleFight.bind(this);
     this.handleFights = this.handleFights.bind(this);
@@ -110,6 +111,12 @@ export default class InteractionHandler {
     }
   }
 
+  private async getEvent(link: string): Promise<Event> {
+    const eventHtml = await this.dataService.fetchData<string>(link);
+
+    return parseEvent(eventHtml);
+  }
+
   private async handleFights(interaction: CommandInteraction): Promise<void> {
     const links = await this.getFightLinks();
     interaction.reply(links.join('\n'));
@@ -125,9 +132,7 @@ export default class InteractionHandler {
 
     const [link] = links;
 
-    const eventHtml = await this.dataService.fetchData<string>(link);
-
-    const event: Event = parseEvent(eventHtml);
+    const event: Event = await this.getEvent(link);
 
     await interaction.reply({ embeds: [this.buildFightEmbed(event, link)] });
   }
@@ -170,7 +175,7 @@ export default class InteractionHandler {
     {
       this.logger.debug(`value: ${value}`)
     }
-    this.logger.debug(`pop value: ${interaction.values.pop()}`)  
+    this.logger.debug(`pop value: ${interaction.values.pop()}`)
 
     //const eventCreateOptions: GuildScheduledEventCreateOptions = {
     //  name: "Event 1",
