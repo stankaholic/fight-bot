@@ -116,10 +116,13 @@ export default class InteractionHandler {
 
     const channels: GuildChannelManager = interaction.guild.channels;
 
-    //var iter = channels.cache.first;
+    var channelId;
 
-    for (let iter of channels.cache.values()) {
-      this.logger.debug(`channel name: ${iter.name}`) // this returns the Snowflake id?
+    for (let [id, channel] of channels.cache.entries()) {
+      this.logger.debug(`id: ${id.toString()} name: ${channel.name}`)
+      if (channel.name == "General") {
+        channelId = id;
+      }
     }
 
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
@@ -127,7 +130,7 @@ export default class InteractionHandler {
       scheduledStartTime: startTime,
       privacyLevel: "GUILD_ONLY",
       entityType: "VOICE",
-      channel: "General",
+      channel: channelId,
     };
 
     interaction.guild.scheduledEvents.create(eventCreateOptions);
