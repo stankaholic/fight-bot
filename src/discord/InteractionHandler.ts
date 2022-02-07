@@ -137,6 +137,7 @@ export default class InteractionHandler {
     await interaction.reply({ embeds: [this.buildFightEmbed(event, link)] });
   }
 
+  //todo: only allow this command in guilds
   private async handleFightEvent(interaction: CommandInteraction): Promise<void> {
     const channels: GuildChannelManager = interaction.guild.channels;
 
@@ -160,12 +161,20 @@ export default class InteractionHandler {
       components: [msg]
     });
   }
-  
-  private async handleEventChannel(interaction: SelectMenuInteraction): Promise<void> {
-    const startTime = new Date();
-    startTime.setFullYear(2022, 2, 4);
-    startTime.setHours(8);
 
+  private async handleEventChannel(interaction: SelectMenuInteraction): Promise<void> {
+    const link = await this.getFightLink();
+    const event: Event = await this.getEvent(link);
+
+    const startTime = new Date(event.date);
+    this.logger.debug(`event.date: ${event.date}`)
+    for (let fight of event.fights) {
+      this.logger.debug(`fight: ${fight}`)
+    }
+    this.logger.debug(`event.imgUrl: ${event.imgUrl}`)
+    this.logger.debug(`event.subtitle: ${event.subtitle}`)
+    this.logger.debug(`event.title: ${event.title}`)
+    this.logger.debug(`startTime: ${startTime}`)
     this.logger.debug(`interaction.message: ${interaction.message}`)
     this.logger.debug(`interaction.locale: ${interaction.locale}`)
     for (let value of interaction.values)
@@ -174,13 +183,14 @@ export default class InteractionHandler {
     }
     this.logger.debug(`pop value: ${interaction.values.pop()}`)
 
-    //const eventCreateOptions: GuildScheduledEventCreateOptions = {
-    //  name: "Event 1",
-    //  scheduledStartTime: startTime,
-    //  privacyLevel: "GUILD_ONLY",
-    //  entityType: "VOICE",
-    //  channel: channelId,
-    //};
+    const eventCreateOptions: GuildScheduledEventCreateOptions = {
+      name: event.title,
+      description: event.subtitle,
+      scheduledStartTime: startTime,
+      privacyLevel: "GUILD_ONLY",
+      entityType: "VOICE",
+      channel: interaction.values.pop(),
+    };
 
     //interaction.guild.scheduledEvents.create(eventCreateOptions);
   }
