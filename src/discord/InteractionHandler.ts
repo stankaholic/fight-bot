@@ -33,6 +33,7 @@ export default class InteractionHandler {
     this.buildFightEmbed = this.buildFightEmbed.bind(this);
     this.handleCommand = this.handleCommand.bind(this);
     this.handleSelectMenu = this.handleSelectMenu.bind(this);
+    this.getFightLink = this.getFightLink.bind(this);
     this.getFightLinks = this.getFightLinks.bind(this);
     this.getEvent = this.getEvent.bind(this);
     this.handleFightEvent = this.handleFightEvent.bind(this);
@@ -98,6 +99,12 @@ export default class InteractionHandler {
     }
   }
 
+  private async getFightLink(): Promise<string> {
+    const [link] = await this.getFightLinks();
+
+    return link;
+  }
+
   private async getFightLinks(): Promise<string[]> {
     try {
       const eventHtml = await this.dataService.fetchEvents();
@@ -123,14 +130,7 @@ export default class InteractionHandler {
   }
 
   private async handleFight(interaction: CommandInteraction): Promise<void> {
-    const links = await this.getFightLinks();
-
-    if (links.length === 0) {
-      interaction.channel.send('Failed retriving event information from UFC');
-      return;
-    }
-
-    const [link] = links;
+    const link = await this.getFightLink();
 
     const event: Event = await this.getEvent(link);
 
