@@ -137,7 +137,8 @@ export default class InteractionHandler {
     await interaction.reply({ embeds: [this.buildFightEmbed(event, link)] });
   }
 
-  //todo: only allow this command in guilds
+  // todo: figure out how to parse card
+  // todo: only allow this command in guilds
   private async handleFightEvent(interaction: CommandInteraction): Promise<void> {
     const channels: GuildChannelManager = interaction.guild.channels;
 
@@ -170,6 +171,7 @@ export default class InteractionHandler {
     this.logger.debug(`event.date: ${event.date}`)
     for (let fight of event.fights) {
       this.logger.debug(`fight: ${fight}`)
+
     }
     this.logger.debug(`event.imgUrl: ${event.imgUrl}`)
     this.logger.debug(`event.subtitle: ${event.subtitle}`)
