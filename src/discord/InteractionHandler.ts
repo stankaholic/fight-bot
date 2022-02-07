@@ -138,12 +138,9 @@ export default class InteractionHandler {
   }
 
   private async handleFightEvent(interaction: CommandInteraction): Promise<void> {
-
-
     const channels: GuildChannelManager = interaction.guild.channels;
 
     var msg: MessageActionRow = new MessageActionRow();
-    var iteration = 1;
     var menu: MessageSelectMenu = new MessageSelectMenu();
     menu.setCustomId("event-channel");
     for (let [id, channel] of channels.cache.entries()) {
@@ -152,7 +149,6 @@ export default class InteractionHandler {
         {
           label: channel.name,
           value: id.toString(),
-          emoji: `${iteration}:one`,
         },
       ]);
     }
@@ -164,6 +160,7 @@ export default class InteractionHandler {
       components: [msg]
     });
   }
+  
   private async handleEventChannel(interaction: SelectMenuInteraction): Promise<void> {
     const startTime = new Date();
     startTime.setFullYear(2022, 2, 4);
