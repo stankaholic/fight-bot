@@ -167,23 +167,34 @@ export default class InteractionHandler {
     const link = await this.getFightLink();
     const event: Event = await this.getEvent(link);
 
-    const startTime = new Date(event.date);
+    const rawTime = new Date(event.date);
     this.logger.debug(`event.date: ${event.date}`)
-    for (let fight of event.fights) {
-      this.logger.debug(`fight: ${fight}`)
+    this.logger.debug(`rawTime.getDate(): ${rawTime.getDate()}`)
+    this.logger.debug(`rawTime.getMonth(): ${rawTime.getMonth()}`)
+    this.logger.debug(`rawTime.getTime(): ${rawTime.getTime()}`)
 
-    }
-    this.logger.debug(`event.imgUrl: ${event.imgUrl}`)
-    this.logger.debug(`event.subtitle: ${event.subtitle}`)
-    this.logger.debug(`event.title: ${event.title}`)
-    this.logger.debug(`startTime: ${startTime}`)
-    this.logger.debug(`interaction.message: ${interaction.message}`)
-    this.logger.debug(`interaction.locale: ${interaction.locale}`)
-    for (let value of interaction.values)
-    {
-      this.logger.debug(`value: ${value}`)
-    }
-    this.logger.debug(`pop value: ${interaction.values.pop()}`)
+    var startTime = new Date(Date.now());
+    startTime.setMonth(rawTime.getMonth());
+    startTime.setDate(rawTime.getDate());
+
+    // for (let fight of event.fights) {
+    //   this.logger.debug(`weight: ${fight.weightClass}, red: ${fight.redCorner}, blue: ${fight.blueCorner}`)
+    // }
+    // this.logger.debug(`event.cards: ${event.cards}`)
+    // for (let card of event.cards) {
+    //   this.logger.debug(`card: ${card}`)
+    // }
+    // this.logger.debug(`event.imgUrl: ${event.imgUrl}`)
+    // this.logger.debug(`event.subtitle: ${event.subtitle}`)
+    // this.logger.debug(`event.title: ${event.title}`)
+    // this.logger.debug(`startTime: ${startTime}`)
+    // this.logger.debug(`interaction.message: ${interaction.message}`)
+    // this.logger.debug(`interaction.locale: ${interaction.locale}`)
+    // for (let value of interaction.values)
+    // {
+    //   this.logger.debug(`value: ${value}`)
+    // }
+    // this.logger.debug(`pop value: ${interaction.values.pop()}`)
 
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
       name: event.title,
@@ -194,7 +205,7 @@ export default class InteractionHandler {
       channel: interaction.values.pop(),
     };
 
-    //interaction.guild.scheduledEvents.create(eventCreateOptions);
+    interaction.guild.scheduledEvents.create(eventCreateOptions);
   }
 
   public handleInteraction(interaction: Interaction): void {
