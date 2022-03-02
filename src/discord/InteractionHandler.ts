@@ -20,6 +20,7 @@ import {
 import { Event, parseEvent, parseEvents } from '../services/FightParser';
 import Logger from '../services/Logging/Logger';
 import UfcService from '../services/UfcService';
+import { eventToDate } from '../util/Parsers';
 
 export default class InteractionHandler {
   private readonly prefix: string;
@@ -167,16 +168,6 @@ export default class InteractionHandler {
     const link = await this.getFightLink();
     const event: Event = await this.getEvent(link);
 
-    const rawTime = new Date(event.date);
-    this.logger.debug(`event.date: ${event.date}`)
-    this.logger.debug(`rawTime.getDate(): ${rawTime.getDate()}`)
-    this.logger.debug(`rawTime.getMonth(): ${rawTime.getMonth()}`)
-    this.logger.debug(`rawTime.getTime(): ${rawTime.getTime()}`)
-
-    var startTime = new Date(Date.now());
-    startTime.setMonth(rawTime.getMonth());
-    startTime.setDate(rawTime.getDate());
-
     // for (let fight of event.fights) {
     //   this.logger.debug(`weight: ${fight.weightClass}, red: ${fight.redCorner}, blue: ${fight.blueCorner}`)
     // }
@@ -199,7 +190,7 @@ export default class InteractionHandler {
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
       name: event.title,
       description: event.subtitle,
-      scheduledStartTime: startTime,
+      scheduledStartTime: eventToDate(event),
       privacyLevel: "GUILD_ONLY",
       entityType: "VOICE",
       channel: interaction.values.pop(),
