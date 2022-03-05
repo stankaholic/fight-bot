@@ -5,6 +5,7 @@ import {
   DateResolvable,
   GuildBasedChannel,
   GuildScheduledEventCreateOptions,
+  GuildScheduledEventEntityType,
   GuildScheduledEventManager,
   GuildVoiceChannelResolvable,
   Interaction,
@@ -14,6 +15,7 @@ import {
   MessageSelectMenu,
   MessageSelectOption,
   MessageSelectOptionData,
+  PrivacyLevel,
   SelectMenuInteraction,
   VoiceChannel
 } from 'discord.js';
@@ -147,13 +149,15 @@ export default class InteractionHandler {
     var menu: MessageSelectMenu = new MessageSelectMenu();
     menu.setCustomId("event-channel");
     for (let [id, channel] of channels.cache.entries()) {
-      this.logger.debug(`id: ${id.toString()} name: ${channel.name}`);
-      menu.addOptions([
-        {
-          label: channel.name,
-          value: id.toString(),
-        },
-      ]);
+      this.logger.debug(`id: ${id.toString()} name: ${channel.name} isVoice: ${channel.isVoice()}`);
+      if (channel.isVoice()) {
+        menu.addOptions([
+          {
+            label: channel.name,
+            value: id.toString(),
+          },
+        ]);
+      }
     }
 
     msg.addComponents(menu)
@@ -168,6 +172,15 @@ export default class InteractionHandler {
     const link = await this.getFightLink();
     const event: Event = await this.getEvent(link);
 
+    let channelId = interaction.values.pop();
+    let channel = await interaction.guild.channels.fetch(channelId);
+    let subtitle = event.subtitle.split(' ');
+    let description = "";
+    for (let word of subtitle) {
+      if (word != ' ') {
+        description = description.concat(" ", word).trim();
+      }
+    }
     // for (let fight of event.fights) {
     //   this.logger.debug(`weight: ${fight.weightClass}, red: ${fight.redCorner}, blue: ${fight.blueCorner}`)
     // }
@@ -189,11 +202,11 @@ export default class InteractionHandler {
 
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
       name: event.title,
-      description: event.subtitle,
+      description: description,
       scheduledStartTime: eventToDate(event),
-      privacyLevel: "GUILD_ONLY",
+      channel: channelId,
       entityType: "VOICE",
-      channel: interaction.values.pop(),
+      privacyLevel: "GUILD_ONLY",
     };
 
     interaction.guild.scheduledEvents.create(eventCreateOptions);
