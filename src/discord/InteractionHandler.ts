@@ -182,10 +182,15 @@ export default class InteractionHandler {
       }
     }
     let title = `${event.title}: ${subtitle}`;
+    let description = "";
+    for (let fight of event.fights) {
+      let re = /\s+/g;
+      description = description.concat(`${fight.blueCorner.name.replace(re, " ")} vs. ${fight.redCorner.name.replace(re, " ")}\n`);
+    }
 
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
       name: title,
-      description: title,
+      description: description,
       scheduledStartTime: eventToDate(event),
       channel: channelId,
       entityType: "VOICE",
