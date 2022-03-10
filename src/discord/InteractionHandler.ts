@@ -174,35 +174,18 @@ export default class InteractionHandler {
 
     let channelId = interaction.values.pop();
     let channel = await interaction.guild.channels.fetch(channelId);
-    let subtitle = event.subtitle.split(' ');
-    let description = "";
-    for (let word of subtitle) {
+    let subtitleSplit = event.subtitle.split(' ');
+    let subtitle = "";
+    for (let word of subtitleSplit) {
       if (word != ' ') {
-        description = description.concat(" ", word).trim();
+        subtitle = subtitle.concat(" ", word).trim();
       }
     }
-    // for (let fight of event.fights) {
-    //   this.logger.debug(`weight: ${fight.weightClass}, red: ${fight.redCorner}, blue: ${fight.blueCorner}`)
-    // }
-    // this.logger.debug(`event.cards: ${event.cards}`)
-    // for (let card of event.cards) {
-    //   this.logger.debug(`card: ${card}`)
-    // }
-    // this.logger.debug(`event.imgUrl: ${event.imgUrl}`)
-    // this.logger.debug(`event.subtitle: ${event.subtitle}`)
-    // this.logger.debug(`event.title: ${event.title}`)
-    // this.logger.debug(`startTime: ${startTime}`)
-    // this.logger.debug(`interaction.message: ${interaction.message}`)
-    // this.logger.debug(`interaction.locale: ${interaction.locale}`)
-    // for (let value of interaction.values)
-    // {
-    //   this.logger.debug(`value: ${value}`)
-    // }
-    // this.logger.debug(`pop value: ${interaction.values.pop()}`)
+    let title = `${event.title}: ${subtitle}`;
 
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
-      name: event.title,
-      description: description,
+      name: title,
+      description: title,
       scheduledStartTime: eventToDate(event),
       channel: channelId,
       entityType: "VOICE",
@@ -210,6 +193,10 @@ export default class InteractionHandler {
     };
 
     interaction.guild.scheduledEvents.create(eventCreateOptions);
+
+    await interaction.reply({
+      content: `Created event: ${title}`
+    });
   }
 
   public handleInteraction(interaction: Interaction): void {
