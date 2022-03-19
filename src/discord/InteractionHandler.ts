@@ -174,17 +174,11 @@ export default class InteractionHandler {
 
     let channelId = interaction.values.pop();
     let channel = await interaction.guild.channels.fetch(channelId);
-    let subtitleSplit = event.subtitle.split(' ');
-    let subtitle = "";
-    for (let word of subtitleSplit) {
-      if (word != ' ') {
-        subtitle = subtitle.concat(" ", word).trim();
-      }
-    }
+    let re = /\s+/g;
+    let subtitle = event.subtitle.replace(re, " ");
     let title = `${event.title}: ${subtitle}`;
     let description = "";
     for (let fight of event.fights) {
-      let re = /\s+/g;
       description = description.concat(`${fight.blueCorner.name.replace(re, " ")} vs. ${fight.redCorner.name.replace(re, " ")}\n`);
     }
 
