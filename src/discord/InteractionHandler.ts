@@ -103,7 +103,14 @@ export default class InteractionHandler {
   }
 
   private async getFightLink(): Promise<string> {
-    const [link] = await this.getFightLinks();
+    let links = await this.getFightLinks();
+    let link = links.shift();
+    let event: Event = await this.getEvent(link);
+    const now : Date = new Date(Date.now());
+
+    if(eventToDate(event) < now) {
+      link = links.shift();
+    }
 
     return link;
   }
@@ -193,8 +200,9 @@ export default class InteractionHandler {
 
     interaction.guild.scheduledEvents.create(eventCreateOptions);
 
-    await interaction.reply({
-      content: `Created event: ${title}`
+    await interaction.update({
+      content: `Created event: ${title}`,
+      components: []
     });
   }
 
