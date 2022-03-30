@@ -2,9 +2,9 @@ import * as Winston from 'winston';
 import Environment from '../../util/Environment';
 import Logger from './Logger';
 
-export default class LoggerFactor {
+export default class LoggerFactory {
   public static myLogger: Logger;
-  
+
   public static createLogger(env: Environment): Logger {
     if (this.myLogger) {
       return this.myLogger;

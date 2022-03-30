@@ -1,13 +1,13 @@
 import * as Discord from 'discord.js';
 import 'dotenv/config';
 import InteractionHandler from './discord/InteractionHandler';
-import LoggerFactor from './services/Logging/LoggerFactory';
+import LoggerFactory from './services/Logging/LoggerFactory';
 import UfcService from './services/UfcService';
 import Environment from './util/Environment';
 
 const env = new Environment(process.env);
 
-const logger = LoggerFactor.createLogger(env);
+const logger = LoggerFactory.createLogger(env);
 const dataService = new UfcService(logger);
 const interactionHandler = new InteractionHandler(logger, dataService);
 
