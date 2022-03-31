@@ -4,8 +4,6 @@ import { Routes } from 'discord-api-types/v9';
 import 'dotenv/config';
 import Environment from './util/Environment';
 
-const env = new Environment(process.env);
-
 const commands = [
   new SlashCommandBuilder()
     .setName('fight')
@@ -18,16 +16,16 @@ const commands = [
     .setDescription('Creates a Discord Event for the upcoming fight'),
 ].map((command) => command.toJSON());
 
-const rest = new REST({ version: '9' }).setToken(env.DISCORD_TOKEN);
+const rest = new REST({ version: '9' }).setToken(Environment.DISCORD_TOKEN);
 
 (async () => {
   try {
-    const appCmds = Routes.applicationCommands(env.CLIENT_ID);
+    const appCmds = Routes.applicationCommands(Environment.CLIENT_ID);
     await rest.put(appCmds, {
       body: commands,
     });
 
-    const appGuildCmds = Routes.applicationGuildCommands(env.CLIENT_ID, env.GUILD_ID);
+    const appGuildCmds = Routes.applicationGuildCommands(Environment.CLIENT_ID, Environment.GUILD_ID);
     await rest.put(appGuildCmds, {
       body: commands,
     });

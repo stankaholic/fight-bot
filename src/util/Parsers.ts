@@ -1,10 +1,7 @@
 import { Event } from '../services/FightParser';
 import LoggerFactory from '../services/Logging/LoggerFactory';
-import Environment from './Environment';
 
-const env = new Environment(process.env);
-
-const logger = LoggerFactory.createLogger(env);
+const logger = LoggerFactory.createLogger();
 
 // UFC Date Parser
 // Sat, Feb 19 / 7:00 PM EST

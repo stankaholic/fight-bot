@@ -5,9 +5,7 @@ import LoggerFactory from './services/Logging/LoggerFactory';
 import UfcService from './services/UfcService';
 import Environment from './util/Environment';
 
-const env = new Environment(process.env);
-
-const logger = LoggerFactory.createLogger(env);
+const logger = LoggerFactory.createLogger();
 const dataService = new UfcService(logger);
 const interactionHandler = new InteractionHandler(logger, dataService);
 
@@ -21,4 +19,4 @@ client.once('ready', () => {
 
 client.on('interactionCreate', interactionHandler.handleInteraction);
 
-client.login(env.DISCORD_TOKEN);
+client.login(Environment.DISCORD_TOKEN);

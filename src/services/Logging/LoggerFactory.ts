@@ -3,15 +3,15 @@ import Environment from '../../util/Environment';
 import Logger from './Logger';
 
 export default class LoggerFactory {
-  public static myLogger: Logger;
+  private static myLogger: Logger;
 
-  public static createLogger(env: Environment): Logger {
+  public static createLogger(): Logger {
     if (this.myLogger) {
       return this.myLogger;
     }
     else {
       const logger = Winston.createLogger({
-        level: env.LOGGING_LEVEL,
+        level: Environment.LOGGING_LEVEL,
         exitOnError: false,
         transports: [
           new Winston.transports.Console({
