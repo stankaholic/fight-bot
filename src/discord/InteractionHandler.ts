@@ -45,10 +45,7 @@ export default class InteractionHandler {
     event.fights.forEach((fight) => {
       const fightData:EmbedFieldData = {
         name: fight.weightClass || 'Unknown',
-        value: `${fight.redCorner.rank} ${fight.redCorner.name}\n
-        ${fight.redCorner.odds}\n
-        vs.\n${fight.blueCorner.rank} ${fight.blueCorner.name}\n
-        ${fight.blueCorner.odds}`,
+        value: `${fight.redCorner.rank} ${fight.redCorner.name}\n${fight.redCorner.odds}\nvs.\n${fight.blueCorner.rank} ${fight.blueCorner.name}\n${fight.blueCorner.odds}`,
         inline: true,
       };
       fights.push(fightData);
