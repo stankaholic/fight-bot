@@ -1,9 +1,9 @@
 import * as Winston from 'winston';
-import Environment from '../../util/Environment';
+import { env } from '../../globals';
 import Logger from './Logger';
 
 export default class LoggerFactor {
-  public static createLogger(env: Environment): Logger {
+  public static createLogger(): Logger {
     const logger = Winston.createLogger({
       level: env.LOGGING_LEVEL,
       exitOnError: false,

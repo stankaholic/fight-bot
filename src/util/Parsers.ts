@@ -1,9 +1,9 @@
 import { Event } from '../services/FightParser';
-import Logger from '../services/Logging/Logger';
+import { logger } from '../globals';
 
 // UFC Date Parser
 // Sat, Feb 19 / 7:00 PM EST
-export function eventToDate(logger: Logger, event: Event): Date {
+export function eventToDate(event: Event): Date {
   const raw = event.date;
   logger.debug(`raw: ${raw}`)
 

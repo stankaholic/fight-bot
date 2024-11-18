@@ -1,12 +1,10 @@
 import axios from 'axios';
-import Logger from './Logging/Logger';
+import { logger } from '../globals'
 
 export default class UfcService {
-  private readonly logger: Logger;
   private static readonly EVENTS_URL = 'https://www.ufc.com/events';
 
-  public constructor(logger: Logger) {
-    this.logger = logger;
+  public constructor() {
 
     this.fetchData = this.fetchData.bind(this);
     this.fetchEvents = this.fetchEvents.bind(this);
@@ -18,7 +16,7 @@ export default class UfcService {
       const data: T = res.data;
       return data;
     } catch (error) {
-      this.logger.error(error.message);
+      logger.error(error.message);
       return undefined;
     }
   }

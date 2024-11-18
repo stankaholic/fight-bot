@@ -2,9 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import 'dotenv/config';
-import Environment from './util/Environment';
-
-const env = new Environment(process.env);
+import { env } from './globals';
 
 const commands = [
   new SlashCommandBuilder()

@@ -10,16 +10,14 @@ import {
   SelectMenuInteraction,
 } from 'discord.js';
 import { Event, parseEvent, parseEvents } from '../services/FightParser';
-import Logger from '../services/Logging/Logger';
+import { logger } from '../globals';
 import UfcService from '../services/UfcService';
 import { eventToDate } from '../util/Parsers';
 
 export default class InteractionHandler {
-  private readonly logger: Logger;
   private readonly dataService: UfcService;
 
-  public constructor(logger: Logger, dataService: UfcService) {
-    this.logger = logger;
+  public constructor(dataService: UfcService) {
     this.dataService = dataService;
 
     this.buildFightEmbed = this.buildFightEmbed.bind(this);
@@ -65,7 +63,7 @@ export default class InteractionHandler {
     interaction: CommandInteraction,
     command: string
   ): Promise<void> {
-    this.logger.info(`Processing command - ${command}`);
+    logger.info(`Processing command - ${command}`);
 
     switch (command) {
       case 'fight':
@@ -78,7 +76,7 @@ export default class InteractionHandler {
         this.handleFightEvent(interaction);
         break;
       default:
-        this.logger.info(`Command not supported - ${command}`);
+        logger.info(`Command not supported - ${command}`);
         break;
     }
   }
@@ -87,14 +85,14 @@ export default class InteractionHandler {
     interaction: SelectMenuInteraction,
     menuId: string
   ): Promise<void> {
-    this.logger.info(`Processing menu - ${menuId}`);
+    logger.info(`Processing menu - ${menuId}`);
 
     switch (menuId) {
       case 'event-channel':
         this.handleEventChannel(interaction);
         break;
       default:
-        this.logger.info(`Menu not supported - ${menuId}`);
+        logger.info(`Menu not supported - ${menuId}`);
         break;
     }
   }
@@ -106,7 +104,7 @@ export default class InteractionHandler {
     const now: Date = new Date(Date.now());
 
     // If current fight is outdated, grab the next one
-    if (eventToDate(this.logger, event) < now) {
+    if (eventToDate(event) < now) {
       link = links.shift();
     }
 
@@ -119,7 +117,7 @@ export default class InteractionHandler {
       const links = parseEvents(eventHtml);
       return links;
     } catch (error) {
-      this.logger.error(
+      logger.error(
         `Failed retrieving events from UFC website - ${error.message}`
       );
       return [];
@@ -155,7 +153,7 @@ export default class InteractionHandler {
     const menu: MessageSelectMenu = new MessageSelectMenu();
     menu.setCustomId('event-channel');
     for (const [id, channel] of channels.cache.entries()) {
-      this.logger.debug(
+      logger.debug(
         `id: ${id.toString()} name: ${
           channel.name
         } isVoice: ${channel.isVoice()}`
@@ -200,7 +198,7 @@ export default class InteractionHandler {
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
       name: title,
       description: description,
-      scheduledStartTime: eventToDate(this.logger, event),
+      scheduledStartTime: eventToDate(event),
       channel: channelId,
       entityType: 'VOICE',
       privacyLevel: 'GUILD_ONLY',
