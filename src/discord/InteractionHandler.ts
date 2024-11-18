@@ -1,6 +1,7 @@
 import {
   GuildChannelManager,
   CommandInteraction,
+  EmbedFieldData,
   GuildScheduledEventCreateOptions,
   Interaction,
   MessageEmbed,
@@ -41,13 +42,21 @@ export default class InteractionHandler {
     embed.setDescription(`${event.subtitle}\n${event.date}`);
     embed.setThumbnail(event.imgUrl);
 
+    const fights: EmbedFieldData[] = [];
+
     event.fights.forEach((fight) => {
-      embed.addField(
-        fight.weightClass || 'Unknown',
-        `${fight.redCorner.rank} ${fight.redCorner.name}\n${fight.redCorner.odds}\nvs.\n${fight.blueCorner.rank} ${fight.blueCorner.name}\n${fight.blueCorner.odds}`,
-        true
-      );
+      const fightData:EmbedFieldData = {
+        name: fight.weightClass || 'Unknown',
+        value: `${fight.redCorner.rank} ${fight.redCorner.name}\n
+        ${fight.redCorner.odds}\n
+        vs.\n${fight.blueCorner.rank} ${fight.blueCorner.name}\n
+        ${fight.blueCorner.odds}`,
+        inline: true,
+      };
+      fights.push(fightData);
     });
+
+    embed.addFields(fights);
 
     return embed;
   }
