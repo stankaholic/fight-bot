@@ -6,6 +6,7 @@ import {
   Interaction,
   MessageEmbed,
   MessageActionRow,
+  MessageButton,
   MessageSelectMenu,
   SelectMenuInteraction,
 } from 'discord.js';
@@ -56,6 +57,18 @@ export default class InteractionHandler {
     return embed;
   }
 
+  private buildBetEmbed(event: Event, url: string): MessageEmbed {
+    const re = /\s+/g;
+
+    const embed = new MessageEmbed();
+
+    var getFight = event.fights.reverse()[0];
+    embed.setTitle(getFight.redCorner.name.replace(re, ' ') + " vs. " + getFight.blueCorner.name.replace(re, ' '));
+    embed.setImage(event.imgUrl);
+
+    return embed;
+  }
+
   private async handleCommand(
     interaction: CommandInteraction,
     command: string
@@ -71,6 +84,9 @@ export default class InteractionHandler {
         break;
       case 'fight-event':
         this.handleFightEvent(interaction);
+        break;
+      case 'bet':
+        this.handleBet(interaction);
         break;
       default:
         logger.info(`Command not supported - ${command}`);
@@ -204,6 +220,35 @@ export default class InteractionHandler {
     interaction.guild.scheduledEvents.create(eventCreateOptions);
 
     await interaction.update(`Created event: ${title}`);
+  }
+
+  private async handleBet(
+    interaction: CommandInteraction
+  ): Promise<void> {
+    const link = await this.getFightLink();
+
+    const eventHtml = await this.dataService.fetchData<string>(link);
+    const event = parseEvent(eventHtml);
+
+    const embed = new MessageEmbed()
+      .setTitle('Example Message')
+      .setDescription('This is an example message with an image and a button.')
+      .setImage('https://example.com/image.jpg');
+
+    const row = new MessageActionRow()
+      .addComponents(
+        new MessageButton()
+          .setCustomId('input-button')
+          .setLabel('Click me!')
+          .setStyle('PRIMARY')
+      );
+
+    await interaction.reply({
+      embeds: [this.buildBetEmbed(event, link)],
+      components: [row],
+    });
+
+    //await interaction.reply({ embeds: [this.buildBetEmbed(event, link)] });
   }
 
   public handleInteraction(interaction: Interaction): void {

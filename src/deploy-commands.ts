@@ -14,6 +14,9 @@ const commands = [
   new SlashCommandBuilder()
     .setName('fight-event')
     .setDescription('Creates a Discord Event for the upcoming fight'),
+  new SlashCommandBuilder()
+    .setName('bet')
+    .setDescription('Starts a betting game'),
 ].map((command) => command.toJSON());
 
 const rest = new REST({ version: '9' }).setToken(env.DISCORD_TOKEN);
