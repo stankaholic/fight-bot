@@ -1,4 +1,5 @@
 import * as Cheerio from 'cheerio';
+import { logger } from '../globals';
 
 const baseUrl = 'https://www.ufc.com';
 
@@ -63,6 +64,7 @@ export const parseEvent = (html: string): Event => {
   const ranks: string[] = $(rankClass)
     .map((_, el) => $(el).text().trim().replace(/\n/g, ''))
     .get();
+  logger.debug(`ranks: ${ranks}`);
   const weightClasses: string[] = $(weightClass)
     .map((_, el) => $(el).text().trim().replace(/\n/g, ''))
     .get();
@@ -76,12 +78,12 @@ export const parseEvent = (html: string): Event => {
       weightClass: weightClass.replace(/ +/g, ' ').trim(),
       redCorner: {
         name: fighters[i],
-        rank: ranks[i],
+        rank: ranks[i * 3], // ranks appear to repeat 3 times
         odds: oddsClasses[i],
       },
       blueCorner: {
         name: fighters[i + 1],
-        rank: ranks[i + 1],
+        rank: ranks[(i * 3) + 1], // ranks appear to repeat 3 times
         odds: oddsClasses[i + 1],
       },
     };
