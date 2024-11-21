@@ -238,8 +238,26 @@ export default class InteractionHandler {
     const row = new MessageActionRow()
       .addComponents(
         new MessageButton()
-          .setCustomId('input-button')
-          .setLabel('Click me!')
+          .setCustomId('left-button')
+          .setLabel('←')
+          .setStyle('PRIMARY')
+      )
+      .addComponents(
+        new MessageButton()
+          .setCustomId('left-fight-button')
+          .setLabel('left fighter')
+          .setStyle('PRIMARY')
+      )
+      .addComponents(
+        new MessageButton()
+          .setCustomId('right-fight-button')
+          .setLabel('right fighter')
+          .setStyle('PRIMARY')
+      )
+      .addComponents(
+        new MessageButton()
+          .setCustomId('right-button')
+          .setLabel('→')
           .setStyle('PRIMARY')
       );
 
