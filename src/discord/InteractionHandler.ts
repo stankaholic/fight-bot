@@ -10,13 +10,14 @@ import {
   MessageSelectMenu,
   SelectMenuInteraction,
 } from 'discord.js';
-import { Event, parseEvent, parseEvents } from '../services/FightParser';
+import { Event, Fight, parseEvent, parseEvents } from '../services/FightParser';
 import { logger } from '../globals';
 import UfcService from '../services/UfcService';
 import { eventToDate } from '../util/Parsers';
 
 export default class InteractionHandler {
   private readonly dataService: UfcService;
+  private currentBetIndex: number = 0;
 
   public constructor(dataService: UfcService) {
     this.dataService = dataService;
@@ -57,14 +58,13 @@ export default class InteractionHandler {
     return embed;
   }
 
-  private buildBetEmbed(event: Event, url: string): MessageEmbed {
+  private buildBetEmbed(fight: Fight, imgUrl: string): MessageEmbed {
     const re = /\s+/g;
 
     const embed = new MessageEmbed();
 
-    var getFight = event.fights.reverse()[0];
-    embed.setTitle(getFight.redCorner.name.replace(re, ' ') + " vs. " + getFight.blueCorner.name.replace(re, ' '));
-    embed.setImage(event.imgUrl);
+    embed.setTitle(fight.redCorner.name.replace(re, ' ') + " vs. " + fight.blueCorner.name.replace(re, ' '));
+    embed.setImage(imgUrl);
 
     return embed;
   }
@@ -230,6 +230,8 @@ export default class InteractionHandler {
     const eventHtml = await this.dataService.fetchData<string>(link);
     const event = parseEvent(eventHtml);
 
+    this.currentBetIndex = event.fights.length - 1;
+
     const embed = new MessageEmbed()
       .setTitle('Example Message')
       .setDescription('This is an example message with an image and a button.')
@@ -262,7 +264,7 @@ export default class InteractionHandler {
       );
 
     await interaction.reply({
-      embeds: [this.buildBetEmbed(event, link)],
+      embeds: [this.buildBetEmbed(event.fights[this.currentBetIndex], event.imgUrl)],
       components: [row],
     });
 
