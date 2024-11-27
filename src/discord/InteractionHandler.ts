@@ -14,10 +14,12 @@ import { Event, Fight, parseEvent, parseEvents } from '../services/FightParser';
 import { logger } from '../globals';
 import UfcService from '../services/UfcService';
 import { eventToDate } from '../util/Parsers';
+import { log } from 'console';
 
 export default class InteractionHandler {
   private readonly dataService: UfcService;
   private currentBetIndex: number = 0;
+  private numOfFights: number = 0;
 
   public constructor(dataService: UfcService) {
     this.dataService = dataService;
@@ -108,6 +110,26 @@ export default class InteractionHandler {
         logger.info(`Menu not supported - ${menuId}`);
         break;
     }
+  }
+
+  private async handleButton(
+    interaction: Interaction,
+    buttonId: string
+  ): Promise<void> {
+    logger.info(`Processing button - ${buttonId}`);
+
+    switch (buttonId) {
+      case 'right-button':
+        this.currentBetIndex = (this.currentBetIndex + 1) % this.numOfFights;
+        break;
+      case 'left-button':
+        this.currentBetIndex = this.currentBetIndex - 1 < 0 ? this.numOfFights - 1 : this.currentBetIndex - 1;
+        break;
+      default:
+        logger.info(`Button not supported - ${buttonId}`);
+        break;
+    }
+    logger.debug(`currentBetIndex: ${this.currentBetIndex}`);
   }
 
   private async getFightLink(): Promise<string> {
@@ -230,12 +252,13 @@ export default class InteractionHandler {
     const eventHtml = await this.dataService.fetchData<string>(link);
     const event = parseEvent(eventHtml);
 
+    this.numOfFights = event.fights.length;
     this.currentBetIndex = event.fights.length - 1;
 
-    const embed = new MessageEmbed()
-      .setTitle('Example Message')
-      .setDescription('This is an example message with an image and a button.')
-      .setImage('https://example.com/image.jpg');
+    // const embed = new MessageEmbed()
+    //   .setTitle('Example Message')
+    //   .setDescription('This is an example message with an image and a button.')
+    //   .setImage('https://example.com/image.jpg');
 
     const row = new MessageActionRow()
       .addComponents(
@@ -278,6 +301,9 @@ export default class InteractionHandler {
       this.handleCommand(interaction, commandName);
     } else if (interaction.isSelectMenu()) {
       this.handleSelectMenu(interaction, interaction.customId);
+    } 
+    else if (interaction.isButton()) {
+      this.handleButton(interaction, interaction.customId);
     } else {
       return;
     }
