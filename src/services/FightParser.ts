@@ -15,10 +15,14 @@ const rankClass = '.c-listing-fight__corner-rank';
 
 const imgClass = '.c-hero__image';
 
+const redCornerImgClass = 'div.c-listing-fight__content-row > div.c-listing-fight__corner--red > div.c-listing-fight__corner-image--red';
+const blueCornerImgClass = 'div.c-listing-fight__content-row > div.c-listing-fight__corner--blue > div.c-listing-fight__corner-image--blue';
+
 export interface FightCorner {
   name: string;
   rank: string;
   odds: string;
+  imgUrl: string;
 }
 
 export interface Fight {
@@ -55,6 +59,13 @@ const parseImage = ($: Cheerio.CheerioAPI): string => {
   return img?.attr('src') ?? '';
 };
 
+const parseCornerImages = ($: Cheerio.CheerioAPI, cornerImgClass: string): string[] => {
+  return $(cornerImgClass).map((_, el) => {
+    const img = $(el).find('img');
+    return img?.attr('src') ?? '';
+  }).get();
+};
+
 export const parseEvent = (html: string): Event => {
   const $ = Cheerio.load(html);
 
@@ -72,6 +83,15 @@ export const parseEvent = (html: string): Event => {
     .map((_, el) => $(el).text().trim().replace(/\n/g, ''))
     .get();
 
+  const redCornerImgUrl = parseCornerImages($, redCornerImgClass);
+  for (let i = 0; i < redCornerImgUrl.length; i++) {
+    logger.debug(`redCornerImgUrl: ${redCornerImgUrl[i]}`);
+  }
+  const blueCornerImgUrl = parseCornerImages($, blueCornerImgClass);
+  for (let i = 0; i < blueCornerImgUrl.length; i++) {
+    logger.debug(`blueCornerImgUrl: ${blueCornerImgUrl[i]}`);
+  }
+
   let i = 0;
   const fights: Fight[] = weightClasses.map((weightClass) => {
     const fight: Fight = {
@@ -80,11 +100,13 @@ export const parseEvent = (html: string): Event => {
         name: fighters[i],
         rank: ranks[i * 3], // ranks appear to repeat 3 times
         odds: oddsClasses[i],
+        imgUrl: '',
       },
       blueCorner: {
         name: fighters[i + 1],
         rank: ranks[(i * 3) + 1], // ranks appear to repeat 3 times
         odds: oddsClasses[i + 1],
+        imgUrl: '',
       },
     };
 
