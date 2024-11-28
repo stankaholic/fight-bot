@@ -9,6 +9,7 @@ import {
   MessageButton,
   MessageSelectMenu,
   SelectMenuInteraction,
+  ButtonInteraction,
 } from 'discord.js';
 import { Event, Fight, parseEvent, parseEvents } from '../services/FightParser';
 import { logger } from '../globals';
@@ -18,6 +19,9 @@ import { log } from 'console';
 
 export default class InteractionHandler {
   private readonly dataService: UfcService;
+
+  private currentEvent: Event = {} as Event;
+  private currentFights: Fight[] = [];
   private currentBetIndex: number = 0;
   private numOfFights: number = 0;
 
@@ -113,23 +117,26 @@ export default class InteractionHandler {
   }
 
   private async handleButton(
-    interaction: Interaction,
+    interaction: ButtonInteraction,
     buttonId: string
   ): Promise<void> {
     logger.info(`Processing button - ${buttonId}`);
 
     switch (buttonId) {
       case 'right-button':
-        this.currentBetIndex = (this.currentBetIndex + 1) % this.numOfFights;
+        this.currentBetIndex = this.currentBetIndex - 1 < 0 ? this.numOfFights - 1 : this.currentBetIndex - 1;
         break;
       case 'left-button':
-        this.currentBetIndex = this.currentBetIndex - 1 < 0 ? this.numOfFights - 1 : this.currentBetIndex - 1;
+        this.currentBetIndex = (this.currentBetIndex + 1) % this.numOfFights;
         break;
       default:
         logger.info(`Button not supported - ${buttonId}`);
         break;
     }
     logger.debug(`currentBetIndex: ${this.currentBetIndex}`);
+    await interaction.update({
+      embeds: [this.buildBetEmbed(this.currentFights[this.currentBetIndex], this.currentEvent.imgUrl)],
+    });
   }
 
   private async getFightLink(): Promise<string> {
@@ -252,6 +259,8 @@ export default class InteractionHandler {
     const eventHtml = await this.dataService.fetchData<string>(link);
     const event = parseEvent(eventHtml);
 
+    this.currentEvent = event;
+    this.currentFights = event.fights;
     this.numOfFights = event.fights.length;
     this.currentBetIndex = event.fights.length - 1;
 
@@ -287,7 +296,7 @@ export default class InteractionHandler {
       );
 
     await interaction.reply({
-      embeds: [this.buildBetEmbed(event.fights[this.currentBetIndex], event.imgUrl)],
+      embeds: [this.buildBetEmbed(this.currentFights[this.currentBetIndex], this.currentEvent.imgUrl)],
       components: [row],
     });
 
