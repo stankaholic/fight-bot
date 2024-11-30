@@ -100,18 +100,18 @@ export const parseEvent = (html: string): Event => {
         name: fighters[i],
         rank: ranks[i * 3], // ranks appear to repeat 3 times
         odds: oddsClasses[i],
-        imgUrl: '',
+        imgUrl: redCornerImgUrl[i / 2],
       },
       blueCorner: {
         name: fighters[i + 1],
         rank: ranks[(i * 3) + 1], // ranks appear to repeat 3 times
         odds: oddsClasses[i + 1],
-        imgUrl: '',
+        imgUrl: blueCornerImgUrl[i / 2],
       },
     };
 
     i += 2;
-
+    logger.debug(`fight: ${JSON.stringify(fight)}`);
     return fight;
   });
 
