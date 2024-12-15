@@ -10,12 +10,14 @@ import {
   MessageSelectMenu,
   SelectMenuInteraction,
   ButtonInteraction,
+  Message,
 } from 'discord.js';
 import { Event, Fight, parseEvent, parseEvents } from '../services/FightParser';
 import { logger } from '../globals';
 import UfcService from '../services/UfcService';
 import { eventToDate } from '../util/Parsers';
 import { log } from 'console';
+import { EmbedBuilder } from '@discordjs/builders';
 
 export default class InteractionHandler {
   private readonly dataService: UfcService;
@@ -64,26 +66,41 @@ export default class InteractionHandler {
     return embed;
   }
 
-  private buildBetEmbed(fight: Fight, imgUrls: string[]): MessageEmbed {
+  private buildBetEmbed(fight: Fight): MessageEmbed[] {
     const re = /\s+/g;
+
+    const embeds : MessageEmbed[] = [];
 
     const embed = new MessageEmbed();
 
     embed.setTitle(fight.redCorner.name.replace(re, ' ') + " vs. " + fight.blueCorner.name.replace(re, ' '));
-    embed.addFields([
-      {
-        name: 'Red Corner',
-        value: `![Red Corner](${fight.redCorner.imgUrl})`
-      },
-      {
-        name: 'Blue Corner',
-        value: `![Blue Corner](${fight.blueCorner.imgUrl})`
-      }
-    ])
-    // embed.setImage(fight.redCorner.imgUrl);
-    // embed.setImage(fight.blueCorner.imgUrl);
+    // embed.addFields([
+    //   {
+    //     name: 'Red Corner',
+    //     value: `![Red Corner](${fight.redCorner.imgUrl})`
+    //   },
+    //   {
+    //     name: 'Blue Corner',
+    //     value: `![Blue Corner](${fight.blueCorner.imgUrl})`
+    //   }
+    // ])
+    embeds.push(
+      new MessageEmbed()
+        //.setURL("https://www.ufc.com/events")
+        .setTitle(fight.redCorner.name.replace(re, ' '))
+        .setDescription(fight.redCorner.odds)
+        .setImage(fight.redCorner.imgUrl)
+      );
+    //embed.setImage(fight.blueCorner.imgUrl);
+    embeds.push(
+      new MessageEmbed()
+        //.setURL("https://www.ufc.com/events")
+        .setTitle(fight.blueCorner.name.replace(re, ' '))
+        .setDescription(fight.blueCorner.odds)
+        .setImage(fight.blueCorner.imgUrl)
+      );
 
-    return embed;
+    return embeds;
   }
 
   private async handleCommand(
@@ -146,12 +163,7 @@ export default class InteractionHandler {
     }
     logger.debug(`currentBetIndex: ${this.currentBetIndex}`);
     await interaction.update({
-      embeds: [
-        this.buildBetEmbed(this.currentFights[this.currentBetIndex],
-          [this.currentFights[this.currentBetIndex].redCorner.imgUrl,
-          this.currentFights[this.currentBetIndex].blueCorner.imgUrl]
-        )
-      ]
+      embeds: this.buildBetEmbed(this.currentFights[this.currentBetIndex]),
     });
   }
 
@@ -295,13 +307,13 @@ export default class InteractionHandler {
       .addComponents(
         new MessageButton()
           .setCustomId('left-fight-button')
-          .setLabel('left fighter')
+          .setLabel(this.currentFights[this.currentBetIndex].redCorner.name)
           .setStyle('PRIMARY')
       )
       .addComponents(
         new MessageButton()
           .setCustomId('right-fight-button')
-          .setLabel('right fighter')
+          .setLabel(this.currentFights[this.currentBetIndex].blueCorner.name)
           .setStyle('PRIMARY')
       )
       .addComponents(
@@ -312,12 +324,7 @@ export default class InteractionHandler {
       );
 
     await interaction.reply({
-      embeds: [
-        this.buildBetEmbed(this.currentFights[this.currentBetIndex],
-          [this.currentFights[this.currentBetIndex].redCorner.imgUrl,
-          this.currentFights[this.currentBetIndex].blueCorner.imgUrl]
-        )
-    ],
+      embeds: this.buildBetEmbed(this.currentFights[this.currentBetIndex]),
       components: [row],
     });
 
