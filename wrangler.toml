@@ -1,2 +1,3 @@
 name = "fight-bot"
 compatibility_date = "2025-08-05"
+compatibility_flags = [ "nodejs_compat" ]
