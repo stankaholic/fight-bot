@@ -2,7 +2,7 @@
 
 Discord bot for getting upcoming UFC events directly in your Discord
 
-[Add to your Server](https://discord.com/api/oauth2/authorize?client_id=629036721635459092&permissions=125952&scope=bot%20applications.commands)
+[Add to your Server](https://discord.com/api/oauth2/authorize?client_id=931732347219492904&permissions=125952&scope=bot%20applications.commands)
 
 ![Example](docs/example.jpg)
 
