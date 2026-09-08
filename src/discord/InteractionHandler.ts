@@ -105,36 +105,50 @@ export default class InteractionHandler {
   }
 
   private async getFightLinks(): Promise<string[]> {
+    const eventHtml = await this.dataService.fetchEvents();
     try {
-      const eventHtml = await this.dataService.fetchEvents();
       const links = parseEvents(eventHtml);
       return links;
     } catch (error) {
       this.logger.error(
-        `Failed retrieving events from UFC website - ${error.message}`
+        `Failed retrieving events from UFC website (${eventHtml}) - ${error.message}`
       );
       return [];
     }
   }
 
   private async getEvent(link: string): Promise<Event> {
+    if (!link) {
+      throw new Error('No event link available');
+    }
+
     const eventHtml = await this.dataService.fetchData<string>(link);
 
     return parseEvent(eventHtml);
   }
 
   private async handleFights(interaction: CommandInteraction): Promise<void> {
-    const links = await this.getFightLinks();
-    interaction.reply(links.join('\n'));
+    try {
+      const links = await this.getFightLinks();
+      await interaction.reply(links.length ? links.join('\n') : 'No events found.');
+    } catch (error) {
+      this.logger.error(`Failed handling fights command - ${error.message}`);
+      await interaction.reply('Sorry, could not retrieve fight events.');
+    }
   }
 
   private async handleFight(interaction: CommandInteraction): Promise<void> {
-    const link = await this.getFightLink();
+    try {
+      const link = await this.getFightLink();
 
-    const eventHtml = await this.dataService.fetchData<string>(link);
-    const event = parseEvent(eventHtml);
+      const eventHtml = await this.dataService.fetchData<string>(link);
+      const event = parseEvent(eventHtml);
 
-    await interaction.reply({ embeds: [this.buildFightEmbed(event, link)] });
+      await interaction.reply({ embeds: [this.buildFightEmbed(event, link)] });
+    } catch (error) {
+      this.logger.error(`Failed handling fight command - ${error.message}`);
+      await interaction.reply('Sorry, could not retrieve fight info.');
+    }
   }
 
   private async handleFightEvent(

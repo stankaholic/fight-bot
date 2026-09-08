@@ -1,6 +1,6 @@
 {
   "name": "fight-bot",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Discord Bot for parsing UFC Events",
   "main": "app.js",
   "author": "William Ford <me@wford.dev>",
@@ -9,11 +9,11 @@
   "scripts": {
     "build": "tsc",
     "dev": "concurrently --kill-others-on-fail -n \"TypeScript,Node\" -c \"cyan,green\" \"npm run watch\" \"npm run nodemon\"",
-    "start": "npx env-cmd node ./dist/app.js",
+    "start": "node ./dist/app.js",
     "nodemon": "npx env-cmd nodemon --inspect ./dist/app.js",
     "watch": "tsc -w",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
-    "register": "npx env-cmd node ./dist/deploy-commands.js"
+    "register": "node ./dist/deploy-commands.js"
   },
   "dependencies": {
     "@discordjs/builders": "^0.13.0",
@@ -25,6 +25,7 @@
     "discord.js": "^13.14.0",
     "dotenv": "^16.4.5",
     "env-cmd": "^10.1.0",
+    "got-scraping": "^3.2.2",
     "winston": "^3.14.1"
   },
   "devDependencies": {

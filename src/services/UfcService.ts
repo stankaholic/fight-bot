@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { gotScraping } from 'got-scraping';
 import Logger from './Logging/Logger';
 
 export default class UfcService {
@@ -12,11 +12,14 @@ export default class UfcService {
     this.fetchEvents = this.fetchEvents.bind(this);
   }
 
+  // ufc.com's bot protection fingerprints the TLS handshake and blocks
+  // Node's/curl's default OpenSSL signature with a 403, regardless of
+  // headers sent. got-scraping mimics a real browser's TLS/HTTP2
+  // fingerprint to get past it.
   public async fetchData<T>(url: string): Promise<T> {
     try {
-      const res = await axios.get(url);
-      const data: T = res.data;
-      return data;
+      const body = await gotScraping(url).text();
+      return body as unknown as T;
     } catch (error) {
       this.logger.error(error.message);
       return undefined;
