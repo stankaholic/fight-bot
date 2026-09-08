@@ -9,11 +9,11 @@
   "scripts": {
     "build": "tsc",
     "dev": "concurrently --kill-others-on-fail -n \"TypeScript,Node\" -c \"cyan,green\" \"npm run watch\" \"npm run nodemon\"",
-    "start": "npx env-cmd node ./dist/app.js",
+    "start": "node ./dist/app.js",
     "nodemon": "npx env-cmd nodemon --inspect ./dist/app.js",
     "watch": "tsc -w",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
-    "register": "npx env-cmd node ./dist/deploy-commands.js"
+    "register": "node ./dist/deploy-commands.js"
   },
   "dependencies": {
     "@discordjs/builders": "^0.13.0",
