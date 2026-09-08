@@ -1,11 +1,5 @@
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+import { gotScraping } from 'got-scraping';
 import Logger from './Logging/Logger';
-
-const execFileAsync = promisify(execFile);
-
-const USER_AGENT =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
 export default class UfcService {
   private readonly logger: Logger;
@@ -18,18 +12,14 @@ export default class UfcService {
     this.fetchEvents = this.fetchEvents.bind(this);
   }
 
-  // Node's TLS fingerprint gets blocked (403) by ufc.com's bot protection
-  // regardless of headers sent, so we shell out to curl instead of axios.
+  // ufc.com's bot protection fingerprints the TLS handshake and blocks
+  // Node's/curl's default OpenSSL signature with a 403, regardless of
+  // headers sent. got-scraping mimics a real browser's TLS/HTTP2
+  // fingerprint to get past it.
   public async fetchData<T>(url: string): Promise<T> {
     try {
-      const { stdout } = await execFileAsync('curl', [
-        '-sS',
-        '-f',
-        '-A',
-        USER_AGENT,
-        url,
-      ]);
-      return stdout as unknown as T;
+      const body = await gotScraping(url).text();
+      return body as unknown as T;
     } catch (error) {
       this.logger.error(error.message);
       return undefined;
