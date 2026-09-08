@@ -24,5 +24,9 @@ const start = async () => {
   client.on('interactionCreate', interactionHandler.handleInteraction);
 
   client.login(env.DISCORD_TOKEN);
+
+  process.on('unhandledRejection', (error: Error) => {
+    logger.error(`Unhandled rejection - ${error.message}`);
+  });
 };
 start();

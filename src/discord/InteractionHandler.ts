@@ -128,8 +128,13 @@ export default class InteractionHandler {
   }
 
   private async handleFights(interaction: CommandInteraction): Promise<void> {
-    const links = await this.getFightLinks();
-    interaction.reply(links.join('\n'));
+    try {
+      const links = await this.getFightLinks();
+      await interaction.reply(links.length ? links.join('\n') : 'No events found.');
+    } catch (error) {
+      this.logger.error(`Failed handling fights command - ${error.message}`);
+      await interaction.reply('Sorry, could not retrieve fight events.');
+    }
   }
 
   private async handleFight(interaction: CommandInteraction): Promise<void> {
