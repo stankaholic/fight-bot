@@ -155,27 +155,39 @@ export default class InteractionHandler {
     interaction: CommandInteraction
   ): Promise<void> {
     const channels: GuildChannelManager = interaction.guild.channels;
+    const botMember = interaction.guild.me;
 
-    const msg: MessageActionRow = new MessageActionRow();
     const menu: MessageSelectMenu = new MessageSelectMenu();
     menu.setCustomId('event-channel');
     for (const [id, channel] of channels.cache.entries()) {
-      this.logger.debug(
-        `id: ${id.toString()} name: ${
-          channel.name
-        } isVoice: ${channel.isVoice()}`
-      );
-      if (channel.isVoice()) {
-        menu.addOptions([
-          {
-            label: channel.name,
-            value: id.toString(),
-          },
-        ]);
+      if (!channel.isVoice()) {
+        continue;
       }
+
+      // Guild-wide Manage Events isn't enough to schedule an event on a
+      // channel that's hidden from the bot via a channel-level permission
+      // overwrite, so only list channels the bot can actually see and join.
+      const permissions = channel.permissionsFor(botMember);
+      if (!permissions?.has(['VIEW_CHANNEL', 'CONNECT'])) {
+        continue;
+      }
+
+      menu.addOptions([
+        {
+          label: channel.name,
+          value: id.toString(),
+        },
+      ]);
     }
 
-    msg.addComponents(menu);
+    if (menu.options.length === 0) {
+      await interaction.reply(
+        "I can't see or join any voice channels here. Give my role View Channel and Connect on the channel you want to use."
+      );
+      return;
+    }
+
+    const msg: MessageActionRow = new MessageActionRow().addComponents(menu);
 
     await interaction.reply({
       content: 'Please select the channel for the event',
