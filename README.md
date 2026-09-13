@@ -15,9 +15,8 @@ hosting notes.
 
 ## Version
 
-Current version: `0.1.0` (see [`package.json`](package.json)). This
-project doesn't yet publish a changelog file — check `git log` for
-history.
+Current version: `0.1.0` (see [`package.json`](package.json)). See
+[`CHANGELOG.md`](CHANGELOG.md) for release history.
 
 ## Commands
 
