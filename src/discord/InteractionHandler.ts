@@ -151,48 +151,60 @@ export default class InteractionHandler {
     }
   }
 
+  // Discord rejects a select menu with more than this many options.
+  private static readonly MAX_SELECT_OPTIONS = 25;
+
   private async handleFightEvent(
     interaction: CommandInteraction
   ): Promise<void> {
-    const channels: GuildChannelManager = interaction.guild.channels;
-    const botMember = interaction.guild.me;
+    try {
+      const channels: GuildChannelManager = interaction.guild.channels;
+      const botMember = interaction.guild.me;
 
-    const menu: MessageSelectMenu = new MessageSelectMenu();
-    menu.setCustomId('event-channel');
-    for (const [id, channel] of channels.cache.entries()) {
-      if (!channel.isVoice()) {
-        continue;
+      const menu: MessageSelectMenu = new MessageSelectMenu();
+      menu.setCustomId('event-channel');
+      for (const [id, channel] of channels.cache.entries()) {
+        if (menu.options.length >= InteractionHandler.MAX_SELECT_OPTIONS) {
+          break;
+        }
+
+        if (!channel.isVoice()) {
+          continue;
+        }
+
+        // Guild-wide Manage Events isn't enough to schedule an event on a
+        // channel that's hidden from the bot via a channel-level permission
+        // overwrite, so only list channels the bot can actually see and join.
+        const permissions = channel.permissionsFor(botMember);
+        if (!permissions?.has(['VIEW_CHANNEL', 'CONNECT'])) {
+          continue;
+        }
+
+        menu.addOptions([
+          {
+            label: channel.name,
+            value: id.toString(),
+          },
+        ]);
       }
 
-      // Guild-wide Manage Events isn't enough to schedule an event on a
-      // channel that's hidden from the bot via a channel-level permission
-      // overwrite, so only list channels the bot can actually see and join.
-      const permissions = channel.permissionsFor(botMember);
-      if (!permissions?.has(['VIEW_CHANNEL', 'CONNECT'])) {
-        continue;
+      if (menu.options.length === 0) {
+        await interaction.reply(
+          "I can't see or join any voice channels here. Give my role View Channel and Connect on the channel you want to use."
+        );
+        return;
       }
 
-      menu.addOptions([
-        {
-          label: channel.name,
-          value: id.toString(),
-        },
-      ]);
+      const msg: MessageActionRow = new MessageActionRow().addComponents(menu);
+
+      await interaction.reply({
+        content: 'Please select the channel for the event',
+        components: [msg],
+      });
+    } catch (error) {
+      this.logger.error(`Failed handling fight-event command - ${error.message}`);
+      await interaction.reply('Sorry, could not set up the fight event.');
     }
-
-    if (menu.options.length === 0) {
-      await interaction.reply(
-        "I can't see or join any voice channels here. Give my role View Channel and Connect on the channel you want to use."
-      );
-      return;
-    }
-
-    const msg: MessageActionRow = new MessageActionRow().addComponents(menu);
-
-    await interaction.reply({
-      content: 'Please select the channel for the event',
-      components: [msg],
-    });
   }
 
   private async handleEventChannel(
