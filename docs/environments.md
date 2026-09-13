@@ -36,8 +36,8 @@ Register slash commands to the test guild: `npx env-cmd -f .env.test node ./dist
 
 ## Shared `GUILD_ID`
 
-Both `.env` and `.env.test` currently point `GUILD_ID` at the same guild
-(`1305714536304738405`, "bot-dev"). This only affects `npm run
+Both `.env` and `.env.test` currently point `GUILD_ID` at the same
+guild ("bot-dev"). This only affects `npm run
 register` — it controls where slash commands show up *instantly*
 instead of waiting ~1 hour for global propagation. It has nothing to do
 with which servers the bot actually operates in day to day, so it's
