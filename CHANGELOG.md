@@ -5,6 +5,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-13
+
 ### Fixed
 
 - `/fight-event` no longer lists voice channels the bot can't see or
