@@ -237,7 +237,12 @@ export default class InteractionHandler {
 
     interaction.guild.scheduledEvents.create(eventCreateOptions);
 
-    await interaction.update(`Created event: ${title}`);
+    // Clear the select menu so it can't be used again to create a
+    // duplicate event.
+    await interaction.update({
+      content: `Created event: ${title}`,
+      components: [],
+    });
   }
 
   public handleInteraction(interaction: Interaction): void {
