@@ -5,6 +5,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `/fight-event`'s channel select menu is now cleared after the event
+  is created, so it can't be clicked again to create a duplicate event.
+
 ## [0.1.1] - 2026-09-13
 
 ### Fixed
