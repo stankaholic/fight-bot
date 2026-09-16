@@ -14,6 +14,11 @@ const rankClass = '.c-listing-fight__corner-rank';
 
 const imgClass = '.c-hero__image';
 
+const earlyPrelimsTimeClass = '.field--name-fight-card-time-early';
+const prelimsTimeClass = '.field--name-fight-card-time-prelims';
+const mainCardTimeClass = '.field--name-fight-card-time-main';
+const broadcasterTimeClass = '.c-event-fight-card-broadcaster__time';
+
 export interface FightCorner {
   name: string;
   rank: string;
@@ -32,6 +37,9 @@ export interface Event {
   date: string;
   imgUrl: string;
   fights: Fight[];
+  earlyPrelimsTime?: Date;
+  prelimsTime?: Date;
+  mainCardTime?: Date;
 }
 
 export const parseEvents = (html: string): string[] => {
@@ -52,6 +60,21 @@ const parseImage = ($: Cheerio.CheerioAPI): string => {
   const imgHero = $(imgClass);
   const img = imgHero.find('img');
   return img?.attr('src') ?? '';
+};
+
+// UFC's markup labels the <time datetime="..."> value with a "Z" (UTC)
+// suffix, but the value itself is actually US Eastern wall-clock time,
+// not true UTC - parsing it directly would be off by several hours.
+// The data-timestamp attribute (Unix epoch seconds) on the ancestor
+// element is accurate, so use that instead.
+const parseSegmentTime = (
+  $: Cheerio.CheerioAPI,
+  fieldSelector: string
+): Date | undefined => {
+  const timestamp = $(fieldSelector)
+    .closest(broadcasterTimeClass)
+    .attr('data-timestamp');
+  return timestamp ? new Date(Number(timestamp) * 1000) : undefined;
 };
 
 export const parseEvent = (html: string): Event => {
@@ -100,11 +123,18 @@ export const parseEvent = (html: string): Event => {
   const date = $(dateClass).text().trim();
   const imgUrl = parseImage($);
 
+  const earlyPrelimsTime = parseSegmentTime($, earlyPrelimsTimeClass);
+  const prelimsTime = parseSegmentTime($, prelimsTimeClass);
+  const mainCardTime = parseSegmentTime($, mainCardTimeClass);
+
   return {
     title,
     subtitle,
     date,
     fights,
     imgUrl,
+    earlyPrelimsTime,
+    prelimsTime,
+    mainCardTime,
   };
 };

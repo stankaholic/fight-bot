@@ -5,6 +5,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `Event` now includes `earlyPrelimsTime`, `prelimsTime`, and
+  `mainCardTime`, parsed from each card segment's broadcast time
+  instead of the single fragile hero-banner date string.
+
 ## [0.1.2] - 2026-09-14
 
 ### Fixed
