@@ -247,43 +247,51 @@ export default class InteractionHandler {
     interaction: SelectMenuInteraction,
     segment: CardSegment
   ): Promise<void> {
-    const link = await this.getFightLink();
-    const event: Event = await this.getEvent(link);
+    try {
+      const link = await this.getFightLink();
+      const event: Event = await this.getEvent(link);
 
-    const channelId = interaction.values.pop();
-    const re = /\s+/g;
-    const subtitle = event.subtitle.replace(re, ' ');
-    const title =
-      segment === 'main'
-        ? `${event.title}: ${subtitle}`
-        : `${event.title}: ${subtitle} - ${CARD_SEGMENT_LABELS[segment]}`;
-    let description = '';
-    for (const fight of event.fights) {
-      if (fight.redCorner.name && fight.blueCorner.name) {
-        description = description.concat(
-          `${fight.blueCorner.name.replace(re, ' ')} vs. ${fight.redCorner.name.replace(re, ' ')}\n`
-        );
+      const channelId = interaction.values.pop();
+      const re = /\s+/g;
+      const subtitle = event.subtitle.replace(re, ' ');
+      const title =
+        segment === 'main'
+          ? `${event.title}: ${subtitle}`
+          : `${event.title}: ${subtitle} - ${CARD_SEGMENT_LABELS[segment]}`;
+      let description = '';
+      for (const fight of event.fights) {
+        if (fight.redCorner.name && fight.blueCorner.name) {
+          description = description.concat(
+            `${fight.blueCorner.name.replace(re, ' ')} vs. ${fight.redCorner.name.replace(re, ' ')}\n`
+          );
+        }
       }
+
+      const eventCreateOptions: GuildScheduledEventCreateOptions = {
+        name: title,
+        description: description,
+        scheduledStartTime:
+          getSegmentTime(event, segment) ?? eventToDate(this.logger, event),
+        channel: channelId,
+        entityType: 'VOICE',
+        privacyLevel: 'GUILD_ONLY',
+      };
+
+      await interaction.guild.scheduledEvents.create(eventCreateOptions);
+
+      // Clear the select menu so it can't be used again to create a
+      // duplicate event.
+      await interaction.update({
+        content: `Created event: ${title}`,
+        components: [],
+      });
+    } catch (error) {
+      this.logger.error(`Failed handling event-channel menu - ${error.message}`);
+      await interaction.update({
+        content: 'Sorry, could not create the fight event.',
+        components: [],
+      });
     }
-
-    const eventCreateOptions: GuildScheduledEventCreateOptions = {
-      name: title,
-      description: description,
-      scheduledStartTime:
-        getSegmentTime(event, segment) ?? eventToDate(this.logger, event),
-      channel: channelId,
-      entityType: 'VOICE',
-      privacyLevel: 'GUILD_ONLY',
-    };
-
-    interaction.guild.scheduledEvents.create(eventCreateOptions);
-
-    // Clear the select menu so it can't be used again to create a
-    // duplicate event.
-    await interaction.update({
-      content: `Created event: ${title}`,
-      components: [],
-    });
   }
 
   public handleInteraction(interaction: Interaction): void {
