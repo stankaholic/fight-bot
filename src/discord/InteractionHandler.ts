@@ -13,6 +13,28 @@ import Logger from '../services/Logging/Logger';
 import UfcService from '../services/UfcService';
 import { eventToDate } from '../util/Parsers';
 
+type CardSegment = 'main' | 'prelims' | 'early';
+
+const CARD_SEGMENT_LABELS: Record<CardSegment, string> = {
+  main: 'Main Card',
+  prelims: 'Prelims',
+  early: 'Early Prelims',
+};
+
+const getSegmentTime = (
+  event: Event,
+  segment: CardSegment
+): Date | undefined => {
+  switch (segment) {
+    case 'prelims':
+      return event.prelimsTime;
+    case 'early':
+      return event.earlyPrelimsTime;
+    default:
+      return event.mainCardTime;
+  }
+};
+
 export default class InteractionHandler {
   private readonly logger: Logger;
   private readonly dataService: UfcService;
@@ -76,13 +98,14 @@ export default class InteractionHandler {
 
   private async handleSelectMenu(
     interaction: SelectMenuInteraction,
-    menuId: string
+    customId: string
   ): Promise<void> {
+    const [menuId, segment] = customId.split(':');
     this.logger.info(`Processing menu - ${menuId}`);
 
     switch (menuId) {
       case 'event-channel':
-        this.handleEventChannel(interaction);
+        this.handleEventChannel(interaction, segment as CardSegment);
         break;
       default:
         this.logger.info(`Menu not supported - ${menuId}`);
@@ -158,11 +181,24 @@ export default class InteractionHandler {
     interaction: CommandInteraction
   ): Promise<void> {
     try {
+      const segment = (interaction.options.getString('card') ??
+        'main') as CardSegment;
+
+      const link = await this.getFightLink();
+      const event = await this.getEvent(link);
+
+      if (!getSegmentTime(event, segment)) {
+        await interaction.reply(
+          `This event doesn't have a ${CARD_SEGMENT_LABELS[segment]} segment.`
+        );
+        return;
+      }
+
       const channels: GuildChannelManager = interaction.guild.channels;
       const botMember = interaction.guild.me;
 
       const menu: MessageSelectMenu = new MessageSelectMenu();
-      menu.setCustomId('event-channel');
+      menu.setCustomId(`event-channel:${segment}`);
       for (const [id, channel] of channels.cache.entries()) {
         if (menu.options.length >= InteractionHandler.MAX_SELECT_OPTIONS) {
           break;
@@ -208,7 +244,8 @@ export default class InteractionHandler {
   }
 
   private async handleEventChannel(
-    interaction: SelectMenuInteraction
+    interaction: SelectMenuInteraction,
+    segment: CardSegment
   ): Promise<void> {
     const link = await this.getFightLink();
     const event: Event = await this.getEvent(link);
@@ -216,7 +253,10 @@ export default class InteractionHandler {
     const channelId = interaction.values.pop();
     const re = /\s+/g;
     const subtitle = event.subtitle.replace(re, ' ');
-    const title = `${event.title}: ${subtitle}`;
+    const title =
+      segment === 'main'
+        ? `${event.title}: ${subtitle}`
+        : `${event.title}: ${subtitle} - ${CARD_SEGMENT_LABELS[segment]}`;
     let description = '';
     for (const fight of event.fights) {
       if (fight.redCorner.name && fight.blueCorner.name) {
@@ -229,7 +269,8 @@ export default class InteractionHandler {
     const eventCreateOptions: GuildScheduledEventCreateOptions = {
       name: title,
       description: description,
-      scheduledStartTime: eventToDate(this.logger, event),
+      scheduledStartTime:
+        getSegmentTime(event, segment) ?? eventToDate(this.logger, event),
       channel: channelId,
       entityType: 'VOICE',
       privacyLevel: 'GUILD_ONLY',

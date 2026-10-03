@@ -5,6 +5,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `/fight-event` now takes an optional `card` choice (Main Card,
+  Prelims, Early Prelims) to pick which segment's start time the
+  scheduled event uses. Replies with a clear error if the chosen
+  segment doesn't exist for that event instead of failing silently.
+
 ## [0.1.3] - 2026-09-16
 
 ### Added

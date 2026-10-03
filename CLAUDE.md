@@ -11,4 +11,6 @@
   `enhancement` if it's a feature) and add a one-line link to it in
   `docs/known-issues.md` (bugs) or `docs/roadmap.md` (enhancements) —
   don't duplicate the description there, so it can't go stale when the
-  issue is closed.
+  issue is closed. When an issue closes or merges, remove its line from
+  that doc in the same pass — check both docs whenever closing an issue
+  or reporting status, not just when filing a new one.

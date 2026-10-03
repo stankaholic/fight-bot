@@ -15,7 +15,17 @@ const commands = [
     .setDescription('Replies with links to upcoming fights'),
   new SlashCommandBuilder()
     .setName('fight-event')
-    .setDescription('Creates a Discord Event for the upcoming fight'),
+    .setDescription('Creates a Discord Event for the upcoming fight')
+    .addStringOption((option) =>
+      option
+        .setName('card')
+        .setDescription('Which part of the card should the event start with?')
+        .addChoices(
+          { name: 'Main Card', value: 'main' },
+          { name: 'Prelims', value: 'prelims' },
+          { name: 'Early Prelims', value: 'early' }
+        )
+    ),
 ].map((command) => command.toJSON());
 
 const rest = new REST({ version: '9' }).setToken(env.DISCORD_TOKEN);
