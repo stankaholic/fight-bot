@@ -5,6 +5,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-03
+
 ### Added
 
 - `/fight-event` now takes an optional `card` choice (Main Card,
