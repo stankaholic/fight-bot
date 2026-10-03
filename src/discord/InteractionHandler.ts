@@ -187,9 +187,17 @@ export default class InteractionHandler {
       const link = await this.getFightLink();
       const event = await this.getEvent(link);
 
-      if (!getSegmentTime(event, segment)) {
+      const segmentTime = getSegmentTime(event, segment);
+      if (!segmentTime) {
         await interaction.reply(
           `This event doesn't have a ${CARD_SEGMENT_LABELS[segment]} segment.`
+        );
+        return;
+      }
+
+      if (segmentTime < new Date()) {
+        await interaction.reply(
+          `${CARD_SEGMENT_LABELS[segment]} for this event has already started.`
         );
         return;
       }

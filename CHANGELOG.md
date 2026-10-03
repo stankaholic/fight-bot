@@ -12,6 +12,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   creation call wasn't even being awaited, so a failure (e.g. missing
   channel permissions) bypassed any error handling entirely and only
   surfaced via the global unhandledRejection handler.
+- `/fight-event` now rejects a chosen card segment whose start time
+  has already passed, with a specific message, instead of letting it
+  fail later with a generic error.
 
 ## [0.1.4] - 2026-10-03
 
