@@ -15,6 +15,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `/fight-event` now rejects a chosen card segment whose start time
   has already passed, with a specific message, instead of letting it
   fail later with a generic error.
+- Event creation failures caused by missing permissions (Discord error
+  50013) now get a specific message naming the missing permission,
+  instead of the generic failure message.
 
 ## [0.1.4] - 2026-10-03
 
