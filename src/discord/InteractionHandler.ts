@@ -187,9 +187,17 @@ export default class InteractionHandler {
       const link = await this.getFightLink();
       const event = await this.getEvent(link);
 
-      if (!getSegmentTime(event, segment)) {
+      const segmentTime = getSegmentTime(event, segment);
+      if (!segmentTime) {
         await interaction.reply(
           `This event doesn't have a ${CARD_SEGMENT_LABELS[segment]} segment.`
+        );
+        return;
+      }
+
+      if (segmentTime < new Date()) {
+        await interaction.reply(
+          `${CARD_SEGMENT_LABELS[segment]} for this event has already started.`
         );
         return;
       }
@@ -247,43 +255,58 @@ export default class InteractionHandler {
     interaction: SelectMenuInteraction,
     segment: CardSegment
   ): Promise<void> {
-    const link = await this.getFightLink();
-    const event: Event = await this.getEvent(link);
+    try {
+      const link = await this.getFightLink();
+      const event: Event = await this.getEvent(link);
 
-    const channelId = interaction.values.pop();
-    const re = /\s+/g;
-    const subtitle = event.subtitle.replace(re, ' ');
-    const title =
-      segment === 'main'
-        ? `${event.title}: ${subtitle}`
-        : `${event.title}: ${subtitle} - ${CARD_SEGMENT_LABELS[segment]}`;
-    let description = '';
-    for (const fight of event.fights) {
-      if (fight.redCorner.name && fight.blueCorner.name) {
-        description = description.concat(
-          `${fight.blueCorner.name.replace(re, ' ')} vs. ${fight.redCorner.name.replace(re, ' ')}\n`
-        );
+      const channelId = interaction.values.pop();
+      const re = /\s+/g;
+      const subtitle = event.subtitle.replace(re, ' ');
+      const title =
+        segment === 'main'
+          ? `${event.title}: ${subtitle}`
+          : `${event.title}: ${subtitle} - ${CARD_SEGMENT_LABELS[segment]}`;
+      let description = '';
+      for (const fight of event.fights) {
+        if (fight.redCorner.name && fight.blueCorner.name) {
+          description = description.concat(
+            `${fight.blueCorner.name.replace(re, ' ')} vs. ${fight.redCorner.name.replace(re, ' ')}\n`
+          );
+        }
       }
+
+      const eventCreateOptions: GuildScheduledEventCreateOptions = {
+        name: title,
+        description: description,
+        scheduledStartTime:
+          getSegmentTime(event, segment) ?? eventToDate(this.logger, event),
+        channel: channelId,
+        entityType: 'VOICE',
+        privacyLevel: 'GUILD_ONLY',
+      };
+
+      await interaction.guild.scheduledEvents.create(eventCreateOptions);
+
+      // Clear the select menu so it can't be used again to create a
+      // duplicate event.
+      await interaction.update({
+        content: `Created event: ${title}`,
+        components: [],
+      });
+    } catch (error) {
+      this.logger.error(`Failed handling event-channel menu - ${error.message}`);
+      // Discord's "Missing Permissions" error (50013) almost always means
+      // the bot's role lacks Manage Events/Create Events - call that out
+      // specifically instead of a generic failure message.
+      const content =
+        error.code === 50013
+          ? "I don't have permission to create events here. My role needs at least Create Events."
+          : 'Sorry, could not create the fight event.';
+      await interaction.update({
+        content,
+        components: [],
+      });
     }
-
-    const eventCreateOptions: GuildScheduledEventCreateOptions = {
-      name: title,
-      description: description,
-      scheduledStartTime:
-        getSegmentTime(event, segment) ?? eventToDate(this.logger, event),
-      channel: channelId,
-      entityType: 'VOICE',
-      privacyLevel: 'GUILD_ONLY',
-    };
-
-    interaction.guild.scheduledEvents.create(eventCreateOptions);
-
-    // Clear the select menu so it can't be used again to create a
-    // duplicate event.
-    await interaction.update({
-      content: `Created event: ${title}`,
-      components: [],
-    });
   }
 
   public handleInteraction(interaction: Interaction): void {

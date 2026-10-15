@@ -5,6 +5,20 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `handleEventChannel` now replies with a clear error instead of
+  leaving the interaction unanswered on failure. The scheduled event
+  creation call wasn't even being awaited, so a failure (e.g. missing
+  channel permissions) bypassed any error handling entirely and only
+  surfaced via the global unhandledRejection handler.
+- `/fight-event` now rejects a chosen card segment whose start time
+  has already passed, with a specific message, instead of letting it
+  fail later with a generic error.
+- Event creation failures caused by missing permissions (Discord error
+  50013) now get a specific message naming the missing permission,
+  instead of the generic failure message.
+
 ## [0.1.4] - 2026-10-03
 
 ### Added
