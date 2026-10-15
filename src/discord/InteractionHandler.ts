@@ -295,8 +295,15 @@ export default class InteractionHandler {
       });
     } catch (error) {
       this.logger.error(`Failed handling event-channel menu - ${error.message}`);
+      // Discord's "Missing Permissions" error (50013) almost always means
+      // the bot's role lacks Manage Events/Create Events - call that out
+      // specifically instead of a generic failure message.
+      const content =
+        error.code === 50013
+          ? "I don't have permission to create events here. My role needs at least Create Events."
+          : 'Sorry, could not create the fight event.';
       await interaction.update({
-        content: 'Sorry, could not create the fight event.',
+        content,
         components: [],
       });
     }
