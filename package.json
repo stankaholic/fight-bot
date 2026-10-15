@@ -1,6 +1,6 @@
 {
   "name": "fight-bot",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Discord Bot for parsing UFC Events",
   "main": "app.js",
   "license": "MIT",
