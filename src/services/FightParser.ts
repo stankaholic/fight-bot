@@ -58,6 +58,16 @@ export const parseEvents = (html: string): string[] => {
 
 const parseImage = ($: Cheerio.CheerioAPI): string => {
   const imgHero = $(imgClass);
+
+  // The hero <picture> lists several <source> breakpoints (xl/lg/md/sm),
+  // all the same crop at different resolutions - use the largest (xl,
+  // listed first) instead of the plain <img src> fallback, which is the
+  // smallest.
+  const srcset = imgHero.find('source').first().attr('srcset');
+  if (srcset) {
+    return srcset.split(',')[0].trim().split(' ')[0];
+  }
+
   const img = imgHero.find('img');
   return img?.attr('src') ?? '';
 };
