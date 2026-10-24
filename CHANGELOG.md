@@ -5,6 +5,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-10-24
+
 ### Added
 
 - `/fight-event`'s scheduled event now gets a cover image matching the
