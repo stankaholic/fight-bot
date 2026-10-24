@@ -5,6 +5,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `/fight-event`'s scheduled event now gets a cover image matching the
+  fight card. UFC's CDN serves WebP by default for the image URL
+  despite its `.jpg` extension, which Discord's event image field
+  doesn't handle correctly (discord.js always labels the upload as
+  JPEG) - the fetch forces a real JPEG via the Accept header instead.
+
 ## [0.1.5] - 2026-10-15
 
 ### Fixed

@@ -275,6 +275,10 @@ export default class InteractionHandler {
         }
       }
 
+      const image = event.imgUrl
+        ? await this.dataService.fetchImage(event.imgUrl)
+        : undefined;
+
       const eventCreateOptions: GuildScheduledEventCreateOptions = {
         name: title,
         description: description,
@@ -283,6 +287,7 @@ export default class InteractionHandler {
         channel: channelId,
         entityType: 'VOICE',
         privacyLevel: 'GUILD_ONLY',
+        image,
       };
 
       await interaction.guild.scheduledEvents.create(eventCreateOptions);

@@ -10,6 +10,7 @@ export default class UfcService {
 
     this.fetchData = this.fetchData.bind(this);
     this.fetchEvents = this.fetchEvents.bind(this);
+    this.fetchImage = this.fetchImage.bind(this);
   }
 
   // ufc.com's bot protection fingerprints the TLS handshake and blocks
@@ -28,5 +29,22 @@ export default class UfcService {
 
   public async fetchEvents(): Promise<string> {
     return this.fetchData<string>(UfcService.EVENTS_URL);
+  }
+
+  public async fetchImage(url: string): Promise<Buffer | undefined> {
+    try {
+      // UFC's CDN serves WebP for this URL by default (based on the
+      // Accept header got-scraping's browser impersonation sends), even
+      // though the URL ends in .jpg. Discord's scheduled-event image
+      // field needs a format it actually supports (JPEG/PNG/GIF), so
+      // explicitly exclude next-gen formats to force a real JPEG back.
+      const buffer = await gotScraping(url, {
+        headers: { accept: 'image/jpeg,image/png,image/gif,*/*' },
+      }).buffer();
+      return buffer as unknown as Buffer;
+    } catch (error) {
+      this.logger.error(error.message);
+      return undefined;
+    }
   }
 }
